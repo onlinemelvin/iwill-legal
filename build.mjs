@@ -1,0 +1,33 @@
+// Builds the public legal pages from D:/iwill/docs/legal/*.md (the source of truth).
+import fs from 'fs';
+import { marked } from 'marked';
+const pages = [
+  ['privacy', 'Privacy policy', 'privacy.md'],
+  ['terms', 'Terms of use', 'terms.md'],
+  ['delete-data', 'Delete your data', 'delete-data.md'],
+];
+const shell = (title, body) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title} · iWill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#17191B;--soft:#4b5157;--bg:#F4FBF9;--card:#fff;--line:#dde9e5;--accent:#A0EEDD}
+@media (prefers-color-scheme:dark){:root{--ink:#EEF2F1;--soft:#b3bcba;--bg:#111615;--card:#182020;--line:#2a3533;--accent:#2f7f6e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.6 Manrope,system-ui,sans-serif}
+header{max-width:760px;margin:0 auto;padding:28px 20px 0;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+header a{color:var(--soft);text-decoration:none;font-weight:700}header a.brand{color:var(--ink);font-size:22px;margin-right:auto}
+main{max-width:760px;margin:20px auto 60px;padding:28px 24px;background:var(--card);border:1px solid var(--line);border-radius:24px}
+h1{font-weight:800;font-size:34px;line-height:1.15;letter-spacing:-.5px;margin:0 0 8px}h2{font-weight:800;font-size:22px;margin:32px 0 8px}
+p,li{color:var(--ink)}a{color:inherit}table{width:100%;border-collapse:collapse;font-size:15px;display:block;overflow-x:auto}
+th,td{text-align:left;vertical-align:top;padding:10px 8px;border-bottom:1px solid var(--line)}th{font-weight:800}
+code{font-size:.9em}strong{font-weight:800}
+</style></head><body>
+<header><a class="brand" href="../">iWill</a><a href="../privacy/">Privacy</a><a href="../terms/">Terms</a><a href="../delete-data/">Delete data</a></header>
+<main>${body}</main></body></html>`;
+for (const [slug, title, file] of pages) {
+  const md = fs.readFileSync(`D:/iwill/docs/legal/${file}`, 'utf8');
+  fs.mkdirSync(slug, { recursive: true });
+  fs.writeFileSync(`${slug}/index.html`, shell(title, marked.parse(md)));
+}
+fs.writeFileSync('index.html', shell('Legal', `<h1>iWill</h1><p>The habit tracker that asks for proof, by CayKen.</p><ul><li><a href="privacy/">Privacy policy</a></li><li><a href="terms/">Terms of use</a></li><li><a href="delete-data/">Delete your data</a></li></ul><p>Contact: onlinemelvin@gmail.com</p>`).replaceAll('href="../', 'href="./'));
+console.log('built');
